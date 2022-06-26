@@ -1,6 +1,5 @@
 package com.programandoconro.weather
 
-import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -11,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-class Requests(){
+class Requests {
 
     suspend fun getCurrentWeather(lat: String, lon: String): WeatherType? {
         val url =
@@ -32,7 +31,7 @@ class Requests(){
         }
         var myWeather: WeatherType? = null
         try {
-           val response:HttpResponse? = client.get(url) {
+            val response: HttpResponse? = client.get(url) {
                 contentType(ContentType.Application.Json)
                 url {
                     parameters.append("appid", apiKey)
