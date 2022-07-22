@@ -64,7 +64,8 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SimpleDateFormat")
     private fun getDayOfWeek(dateString: String?): String {
-        val date: Date = dateString?.let { SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(it) } as Date
+        val date: Date =
+            dateString?.let { SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(it) } as Date
         return SimpleDateFormat("EE").format(date)
     }
 
@@ -72,32 +73,38 @@ class MainActivity : AppCompatActivity() {
     private fun setWeatherText() {
         val weather: TextView = findViewById(R.id.weather)
 
-        weather.text = """
+        if (response?.cnt != null) {
+
+            weather.text = """
             Date: ${response?.list?.get(counter)?.dt_txt} ${getDayOfWeek(response?.list?.get(counter)?.dt_txt)}
             Temperature: ${response?.list?.get(counter)?.main?.temp} 
             Description: ${response?.list?.get(counter)?.weather?.get(0)?.main}
             Clouds: ${response?.list?.get(counter)?.clouds?.all}%
             
             """.trimIndent()
+        }
 
     }
-
 
     private fun getApiRequest() {
         showProgressBar(true)
         runBlocking {
             launch {
-
-                response = requests.getFutureWeather(
-                    "${mLocation?.latitude}",
-                    "${mLocation?.longitude}"
-                )
-
+                try {
+                        response = requests.getFutureWeather(
+                            "${mLocation?.latitude}",
+                            "${mLocation?.longitude}"
+                        )
+                } catch (e: Exception) {
+                    println(e)
+                }
             }
         }
-        maxIndex = response?.cnt!!
-        setWeatherText()
-        showProgressBar(false)
+        if (response != null) {
+            maxIndex = response?.cnt!!
+            setWeatherText()
+            showProgressBar(false)
+        }
 
     }
 
