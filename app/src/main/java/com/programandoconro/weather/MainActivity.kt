@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
@@ -19,23 +21,30 @@ class MainActivity : AppCompatActivity() {
     private var counter = 0
     private var maxIndex = 1
     private var mLocation: Location? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val permission = Permission(this, this)
         if (!permission.isGpsGranted()) {
             permission.requestGps()
+        } else {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    println(location)
+                    mLocation = location
+                    getApiRequest()
+                }
+
         }
 
         setContentView(R.layout.activity_main)
-        val coordinates = Coordinates(this)
-        mLocation = coordinates.getCurrentLocation()
-
 
         val refreshButton = findViewById<Button>(R.id.buttonRefresh)
         val nextButton = findViewById<Button>(R.id.buttonNext)
         val prevButton = findViewById<Button>(R.id.buttonPrev)
-        getApiRequest()
 
         refreshButton.setOnClickListener {
             getApiRequest()
@@ -91,10 +100,10 @@ class MainActivity : AppCompatActivity() {
         runBlocking {
             launch {
                 try {
-                        response = requests.getFutureWeather(
-                            "${mLocation?.latitude}",
-                            "${mLocation?.longitude}"
-                        )
+                    response = requests.getFutureWeather(
+                        "${mLocation?.latitude}",
+                        "${mLocation?.longitude}"
+                    )
                 } catch (e: Exception) {
                     println(e)
                 }
